@@ -320,6 +320,8 @@ td .mono { color: var(--muted); }
 .plan ul { margin: 0; padding: 0; list-style: none; display: grid; gap: 8px; color: var(--muted); }
 .plan li { display: grid; grid-template-columns: 18px 1fr; gap: 8px; }
 .plan li::before { content: "✓"; color: var(--mint); font-weight: 700; }
+.plan .launch { margin-top: -6px; font-size: var(--s-1); font-weight: 600; color: var(--coral); }
+.plan .fine { font-size: var(--s-1); color: var(--faint); }
 
 .faq { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 28px 48px; max-width: 980px; }
 .faq h3 { font: 600 var(--s0)/1.35 var(--body); margin-bottom: 6px; }
@@ -527,7 +529,7 @@ footer { border-top: 1px solid var(--line); padding-block: 28px 40px; display: f
       <div class="sec-head">
         <p class="eyebrow">Pricing</p>
         <h2>Pay once. Keep it.</h2>
-        <p>No subscription, no account. Waitlist members get the launch price.</p>
+        <p>No subscription. Pro includes a year of updates, and the app keeps working after that.</p>
       </div>
       <div class="price-grid">
         <div class="plan">
@@ -535,21 +537,27 @@ footer { border-top: 1px solid var(--line); padding-block: 28px 40px; display: f
           <p class="amt">€0</p>
           <ul>
             <li>The bar with live status for every session</li>
+            <li>Claude Code, Copilot CLI and Codex</li>
             <li>One-click jump to the exact pane</li>
+            <li>History with one-click resume</li>
             <li>Keyboard shortcuts and quick switcher</li>
             <li>Done and waiting reminders</li>
           </ul>
         </div>
         <div class="plan pro">
           <h3>Pro</h3>
-          <p class="amt">€15 <small>one-time</small></p>
+          <p class="amt">€24 <small>one-time</small></p>
+          <p class="launch">€19 at launch for everyone on the waitlist</p>
           <ul>
             <li>Everything in Free</li>
             <li>Answer Claude's permission requests from the bar</li>
             <li>Interrupt any session with Esc</li>
             <li>Plan limits for Claude, Copilot and Codex</li>
             <li>Changes, API value, daily stats and weekly recap</li>
+            <li>The app window: overview, sessions and usage</li>
+            <li>One year of updates included</li>
           </ul>
+          <p class="fine">After the first year, the app keeps working. Another year of updates is €12, if you want it.</p>
         </div>
       </div>
     </section>
