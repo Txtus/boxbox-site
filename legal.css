@@ -1,0 +1,38 @@
+/* Rechtstexte: dieselben Farben und Schriften wie die Landingpage, nur ruhiger. */
+:root {
+  color-scheme: dark;
+  --ink: #0E0D10;
+  --raised: #17151A;
+  --line: #2B2830;
+  --text: #F3F1F2;
+  --muted: #9C97A1;
+  --faint: #6A6570;
+  --coral: #E8836A;
+  --display: "Bricolage Grotesque", "Avenir Next", "Helvetica Neue", Arial, sans-serif;
+  --body: "Geist", -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif;
+}
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme="dark"]) {
+    color-scheme: light;
+    --ink: #F6F4F5; --raised: #FFFFFF; --line: #E0DBDE; --text: #18161B; --muted: #5F5A65; --faint: #8A8590; --coral: #C4553A;
+  }
+}
+:root[data-theme="light"] {
+  color-scheme: light;
+  --ink: #F6F4F5; --raised: #FFFFFF; --line: #E0DBDE; --text: #18161B; --muted: #5F5A65; --faint: #8A8590; --coral: #C4553A;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--ink); color: var(--text); font: 400 16px/1.65 var(--body); padding-inline: 20px; }
+main { max-width: 68ch; margin: 0 auto; padding-block: 48px 72px; }
+a { color: var(--coral); }
+a:focus-visible { outline: 2px solid var(--coral); outline-offset: 2px; border-radius: 4px; }
+.back { display: inline-block; margin-bottom: 32px; color: var(--muted); text-decoration: none; font-size: 14px; }
+.back:hover { color: var(--text); }
+h1 { font: 800 clamp(2rem, 5vw, 2.8rem)/1.05 var(--display); letter-spacing: -0.02em; margin: 0 0 8px; text-wrap: balance; }
+.sub { color: var(--muted); margin: 0 0 36px; }
+h2 { font: 700 1.25rem/1.25 var(--display); margin: 36px 0 8px; }
+p, ul { margin: 0 0 12px; color: var(--muted); }
+p strong, li strong { color: var(--text); font-weight: 600; }
+ul { padding-left: 1.2em; }
+address { font-style: normal; color: var(--text); padding: 16px 18px; border: 1px solid var(--line); border-radius: 12px; background: var(--raised); margin: 0 0 12px; }
+.stand { margin-top: 40px; font-size: 14px; color: var(--faint); }

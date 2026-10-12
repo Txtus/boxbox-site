@@ -1,9 +1,7 @@
 <title>Boxbox</title>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="description" content="A slim bar at the edge of your Mac screen that shows every Claude Code, GitHub Copilot CLI and Codex CLI session. One click takes you to the right terminal pane.">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="fonts/fonts.css">
 <style>
 /* Layout: a dark product world. Left: the claim and the waitlist. Right: the bar itself, live, at the edge of a fake desktop. Everything below reads like the app's hover card. */
 :root {
@@ -330,6 +328,7 @@ td .mono { color: var(--muted); }
 .closing { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 470px); gap: 32px; align-items: end; }
 .closing h2 { font-size: var(--s3); line-height: 1.05; letter-spacing: -0.025em; }
 
+.join-note a, footer a { color: inherit; text-decoration: underline; text-underline-offset: 2px; }
 footer { border-top: 1px solid var(--line); padding-block: 28px 40px; display: flex; flex-wrap: wrap; gap: 12px 24px; justify-content: space-between; color: var(--faint); font-size: var(--s-1); }
 
 @media (max-width: 920px) {
@@ -413,6 +412,7 @@ footer { border-top: 1px solid var(--line); padding-block: 28px 40px; display: f
             </div>
           </details>
           <p class="join-note" id="join-note">One email when the beta opens. Nothing else.</p>
+          <p class="join-note">By signing up you agree that we store your email and answers to tell you about the launch. Unsubscribe any time. <a href="datenschutz.html">Privacy policy</a></p>
           <p class="join-note" id="join-owner" hidden></p>
         </form>
 
@@ -582,6 +582,7 @@ footer { border-top: 1px solid var(--line); padding-block: 28px 40px; display: f
   <footer>
     <span>Boxbox · works with Claude Code, GitHub Copilot CLI and Codex CLI · not affiliated with Anthropic, GitHub or OpenAI</span>
     <span>Claude is a trademark of Anthropic, PBC. GitHub Copilot is a trademark of GitHub, Inc. Codex is a trademark of OpenAI.</span>
+    <span><a href="impressum.html">Legal notice</a> · <a href="datenschutz.html">Privacy</a></span>
   </footer>
 </div>
 
