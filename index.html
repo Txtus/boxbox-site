@@ -1,0 +1,717 @@
+<title>Boxbox</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="A slim bar at the edge of your Mac screen that shows every Claude Code, GitHub Copilot CLI and Codex CLI session. One click takes you to the right terminal pane.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: a dark product world. Left: the claim and the waitlist. Right: the bar itself, live, at the edge of a fake desktop. Everything below reads like the app's hover card. */
+:root {
+  color-scheme: dark;
+  --ink: #0E0D10;
+  --raised: #17151A;
+  --tile: #1E1C22;
+  --line: #2B2830;
+  --text: #F3F1F2;
+  --muted: #9C97A1;
+  --faint: #6A6570;
+  --coral: #E8836A;
+  --amber: #FFB43C;
+  --mint: #3DDC97;
+  --sky: #6CB8FF;
+  --on-accent: #0E0D10;
+  --glow: rgba(232, 131, 106, 0.16);
+
+  /* Die Demo zeigt die App, und die ist immer dunkel. */
+  --app-surface: #121116;
+  --app-card: #18171D;
+  --app-tile: #1F1E25;
+  --app-text: #F2F2F5;
+  --app-muted: #8C8C98;
+  --app-line: rgba(255, 255, 255, 0.09);
+
+  --display: "Bricolage Grotesque", "Avenir Next", "Helvetica Neue", Arial, sans-serif;
+  --body: "Geist", -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif;
+  --mono: "Geist Mono", ui-monospace, "SF Mono", Menlo, monospace;
+
+  --s-1: 0.8125rem;
+  --s0: 1rem;
+  --s1: 1.1875rem;
+  --s2: 1.5rem;
+  --s3: 2.25rem;
+  --s4: clamp(2.6rem, 5.4vw, 4.4rem);
+}
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme="dark"]) {
+    color-scheme: light;
+    --ink: #F6F4F5;
+    --raised: #FFFFFF;
+    --tile: #EFECEE;
+    --line: #E0DBDE;
+    --text: #18161B;
+    --muted: #5F5A65;
+    --faint: #8A8590;
+    --coral: #C4553A;
+    --amber: #A86A00;
+    --mint: #0F8452;
+    --sky: #2672C2;
+    --on-accent: #FFFFFF;
+    --glow: rgba(196, 85, 58, 0.10);
+  }
+}
+:root[data-theme="light"] {
+  color-scheme: light;
+  --ink: #F6F4F5;
+  --raised: #FFFFFF;
+  --tile: #EFECEE;
+  --line: #E0DBDE;
+  --text: #18161B;
+  --muted: #5F5A65;
+  --faint: #8A8590;
+  --coral: #C4553A;
+  --amber: #A86A00;
+  --mint: #0F8452;
+  --sky: #2672C2;
+  --on-accent: #FFFFFF;
+  --glow: rgba(196, 85, 58, 0.10);
+}
+
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: var(--ink);
+  color: var(--text);
+  font: 400 var(--s0)/1.6 var(--body);
+  padding-inline: clamp(16px, 4vw, 48px);
+  -webkit-font-smoothing: antialiased;
+}
+.wrap { max-width: 1160px; margin-inline: auto; }
+a { color: inherit; }
+:focus-visible { outline: 2px solid var(--sky); outline-offset: 3px; border-radius: 6px; }
+h1, h2, h3 { font-family: var(--display); text-wrap: balance; margin: 0; }
+p { margin: 0; }
+code, .mono { font-family: var(--mono); font-size: 0.9em; }
+.eyebrow {
+  font: 500 var(--s-1)/1 var(--mono);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--faint);
+}
+
+/* Kopf */
+.top {
+  display: flex; align-items: center; justify-content: space-between; gap: 16px;
+  padding-block: 22px;
+}
+.brand { display: flex; align-items: center; gap: 10px; font: 700 1.15rem/1 var(--display); text-decoration: none; }
+.mark {
+  width: 14px; height: 30px; border-radius: 8px; background: var(--raised);
+  border: 1px solid var(--line); display: grid; align-content: center; justify-items: center; gap: 3px;
+}
+.mark i { width: 6px; height: 6px; border-radius: 50%; display: block; }
+.top nav { display: flex; gap: 22px; align-items: center; font-size: var(--s-1); color: var(--muted); }
+.top nav a { text-decoration: none; }
+.top nav a:hover { color: var(--text); }
+.pill-link {
+  border: 1px solid var(--line); padding: 7px 14px; border-radius: 999px; color: var(--text) !important;
+}
+
+/* Hero */
+.hero {
+  display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); gap: clamp(28px, 5vw, 64px);
+  align-items: center; padding-block: clamp(24px, 6vw, 72px) clamp(48px, 7vw, 96px);
+  position: relative;
+}
+.hero::before {
+  content: ""; position: absolute; inset: -10% 30% 20% -20%; z-index: -1;
+  background: radial-gradient(closest-side, var(--glow), transparent); pointer-events: none;
+}
+.hero h1 {
+  font-size: var(--s4); line-height: 0.98; font-weight: 800; letter-spacing: -0.035em;
+  font-variation-settings: "opsz" 96;
+}
+.hero h1 .need { color: var(--amber); }
+.lede { margin-top: 22px; font-size: var(--s1); color: var(--muted); max-width: 34ch; }
+.works { margin-top: 26px; display: flex; flex-wrap: wrap; gap: 8px; }
+.chip {
+  font: 500 var(--s-1)/1 var(--mono); padding: 7px 10px; border-radius: 7px;
+  background: var(--tile); color: var(--muted); border: 1px solid var(--line);
+}
+
+/* Warteliste */
+.join { margin-top: 30px; display: grid; gap: 12px; max-width: 470px; }
+.join-row { display: flex; gap: 8px; flex-wrap: wrap; }
+.join input[type="email"] {
+  flex: 1 1 220px; min-width: 0; font: inherit; color: var(--text); background: var(--raised);
+  border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px;
+}
+.join input[type="email"]::placeholder { color: var(--faint); }
+.btn {
+  font: 600 var(--s0)/1 var(--body); border: 0; cursor: pointer; border-radius: 10px;
+  padding: 13px 18px; background: var(--coral); color: var(--on-accent);
+  transition: transform .15s ease, filter .15s ease;
+}
+.btn:hover { filter: brightness(1.08); }
+.btn:active { transform: translateY(1px); }
+.agents { border: 0; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 6px 14px; color: var(--muted); font-size: var(--s-1); }
+.agents legend { padding: 0; margin-bottom: 6px; color: var(--faint); }
+.agents label { display: inline-flex; gap: 6px; align-items: center; cursor: pointer; }
+.agents input { accent-color: var(--coral); }
+.join-note { font-size: var(--s-1); color: var(--faint); }
+.join-done { font-size: var(--s0); color: var(--mint); }
+
+/* Demo */
+.desk {
+  position: relative; border-radius: 22px; padding: 18px; min-height: 440px;
+  background:
+    radial-gradient(120% 90% at 0% 100%, rgba(108, 184, 255, 0.18), transparent 55%),
+    radial-gradient(90% 80% at 100% 0%, rgba(232, 131, 106, 0.22), transparent 60%),
+    #1A1820;
+  border: 1px solid var(--line);
+  display: grid; grid-template-columns: minmax(0, 1fr) 76px; gap: 18px; align-items: center;
+  box-shadow: 0 30px 80px -40px rgba(0, 0, 0, 0.6);
+}
+.term {
+  align-self: stretch; border-radius: 12px; background: #0D0C10; border: 1px solid var(--app-line);
+  display: grid; grid-template-rows: auto 1fr; overflow: hidden; min-width: 0;
+}
+.term-bar {
+  display: flex; align-items: center; gap: 6px; padding: 9px 12px; border-bottom: 1px solid var(--app-line);
+  font: 500 12px/1 var(--mono); color: var(--app-muted);
+}
+.term-bar i { width: 10px; height: 10px; border-radius: 50%; background: #3A3840; display: block; }
+.term-bar span { margin-left: 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.term pre {
+  margin: 0; padding: 14px; font: 400 12.5px/1.65 var(--mono); color: #C9C6CE; white-space: pre-wrap;
+  overflow: hidden;
+}
+.term .p { color: var(--app-muted); }
+.term .hl { color: #FFB43C; }
+.term .ok { color: #3DDC97; }
+
+.bar {
+  width: 76px; border-radius: 38px; padding: 16px 0; display: grid; justify-items: center; gap: 18px;
+  background: linear-gradient(#18171E, #0C0C10); border: 1px solid rgba(255, 255, 255, 0.14);
+  box-shadow: 0 18px 40px -18px rgba(0, 0, 0, 0.7);
+}
+.star { width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center;
+  background: conic-gradient(#E07A5A 0 62%, rgba(255,255,255,.08) 62% 100%); }
+.star::after { content: ""; width: 27px; height: 27px; border-radius: 50%; background: #131217; }
+.ico {
+  --c: #7C8CFF; position: relative; width: 46px; height: 46px; border-radius: 14px; border: 0; padding: 0;
+  background: var(--c); color: #0B0B0E; font: 700 16px/1 var(--display); cursor: pointer;
+  display: grid; place-items: center; transition: filter .3s ease, transform .15s ease;
+}
+.ico:hover { transform: scale(1.05); }
+.ico .ring { position: absolute; inset: -6px; border-radius: 50%; pointer-events: none; opacity: 0; transition: opacity .3s; }
+.ico .badge {
+  position: absolute; top: -6px; right: -6px; width: 18px; height: 18px; border-radius: 50%;
+  border: 2.5px solid #0E0D12; font: 800 10px/13px var(--body); text-align: center; color: #0B0B0E;
+  opacity: 0; transform: scale(.6); transition: opacity .25s, transform .25s;
+}
+.ico .ctx { position: absolute; left: 7px; right: 7px; bottom: 5px; height: 3px; border-radius: 2px; background: rgba(0,0,0,.25); overflow: hidden; }
+.ico .ctx b { display: block; height: 100%; background: rgba(11,11,14,.55); }
+.ico[data-s="idle"] { filter: saturate(.15) brightness(.6); }
+.ico[data-s="running"] .ring {
+  opacity: 1; border: 3px solid transparent;
+  background: conic-gradient(from var(--a, 0deg), transparent 0 70%, #FFB59A 100%) border-box;
+  -webkit-mask: linear-gradient(#000 0 0) padding-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor; mask-composite: exclude;
+  animation: spin 1.6s linear infinite;
+}
+.ico[data-s="needs"] { box-shadow: 0 0 0 0 rgba(255,180,60,.6); animation: breathe 1.8s ease-in-out infinite; }
+.ico[data-s="needs"] .badge { opacity: 1; transform: none; background: #FFB43C; }
+.ico[data-s="needs"] .badge::after { content: "?"; }
+.ico[data-s="done"] .ring { opacity: 1; border-radius: 18px; border: 2.5px solid #3DDC97; inset: -5px; }
+.ico[data-s="done"] .badge { opacity: 1; transform: none; background: #3DDC97; }
+.ico[data-s="done"] .badge::after { content: "✓"; }
+.ico.active { outline: 2px solid rgba(255,255,255,.75); outline-offset: 4px; }
+.ico .am { position: absolute; top: 4px; left: 50%; transform: translateX(-50%); width: 10px; height: 10px; padding: 2px; box-sizing: content-box; border-radius: 5px; background: rgba(11,11,14,.82); }
+.ico .ini { margin-top: 15px; font-size: 13px; }
+.ico::before { content: ""; position: absolute; top: 0; left: 12px; right: 12px; height: 3px; border-radius: 0 0 3px 3px; background: var(--ag, transparent); }
+@property --a { syntax: "<angle>"; inherits: false; initial-value: 0deg; }
+@keyframes spin { to { --a: 360deg; } }
+@keyframes breathe { 50% { box-shadow: 0 0 22px 6px rgba(255,180,60,.45); } }
+
+.card {
+  position: absolute; right: 108px; width: min(300px, calc(100% - 140px)); padding: 16px; border-radius: 16px;
+  background: var(--app-card); border: 1px solid var(--app-line); color: var(--app-text);
+  box-shadow: 0 24px 50px -20px rgba(0, 0, 0, 0.8); display: grid; gap: 8px;
+  top: 150px;
+  transition: top .35s cubic-bezier(.2,.8,.2,1), opacity .25s;
+}
+.card[hidden] { display: none !important; }
+.card .head { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.agent-chip { display: inline-flex; align-items: center; gap: 5px; padding: 3px 8px; border-radius: 999px; font: 700 11px/1 var(--body); color: var(--ag); border: 1px solid color-mix(in srgb, var(--ag) 40%, transparent); background: color-mix(in srgb, var(--ag) 12%, transparent); white-space: nowrap; }
+.agent-chip svg { width: 11px; height: 11px; }
+.agents-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+.agent { padding: 20px; border-radius: 16px; background: var(--raised); border: 1px solid var(--line); display: grid; gap: 12px; align-content: start; }
+.agent header { display: flex; align-items: center; gap: 10px; }
+.agent header svg { width: 26px; height: 26px; flex: none; }
+.agent h3 { font: 700 var(--s1)/1.15 var(--display); }
+.agent .src { font: 400 var(--s-1)/1.3 var(--mono); color: var(--faint); }
+.agent ul { margin: 0; padding: 0; list-style: none; display: grid; gap: 6px; font-size: var(--s-1); color: var(--muted); }
+.agent li::before { content: "✓"; color: var(--mint); margin-right: 8px; font-weight: 700; }
+.agent li.no::before { content: "–"; color: var(--faint); }
+.agents-next { margin-top: 14px; font-size: var(--s-1); color: var(--faint); }
+.card h3 { font: 700 16px/1.2 var(--body); }
+.card .meta { font: 400 12px/1.3 var(--mono); color: var(--app-muted); }
+.card .lab { margin-top: 4px; font: 700 11px/1 var(--body); letter-spacing: .08em; text-transform: uppercase; }
+.card .cmd { font: 400 13px/1.3 var(--mono); background: var(--app-tile); border-radius: 8px; padding: 8px 10px; }
+.card .acts { display: flex; gap: 6px; }
+.card .acts button {
+  flex: 1; font: 600 12px/1 var(--body); padding: 8px 4px; border-radius: 8px; cursor: pointer;
+  border: 1px solid var(--app-line); background: var(--app-tile); color: var(--app-text);
+}
+.card .acts .allow { background: #3DDC97; border-color: transparent; color: #0B0B0E; }
+.card .acts .deny { color: var(--app-muted); }
+.desk-cap { margin-top: 12px; font-size: var(--s-1); color: var(--faint); text-align: right; }
+
+/* Abschnitte */
+section { padding-block: clamp(48px, 7vw, 88px); border-top: 1px solid var(--line); }
+.sec-head { display: grid; gap: 12px; max-width: 640px; margin-bottom: clamp(28px, 4vw, 44px); }
+.sec-head h2 { font-size: var(--s3); line-height: 1.05; letter-spacing: -0.025em; font-weight: 700; }
+.sec-head p:not(.eyebrow) { color: var(--muted); font-size: var(--s1); }
+
+.states { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
+.state { padding: 18px; border-radius: 14px; background: var(--raised); border: 1px solid var(--line); display: grid; gap: 10px; align-content: start; }
+.state .dot { width: 12px; height: 12px; border-radius: 50%; }
+.state h3 { font: 600 var(--s0)/1.2 var(--body); }
+.state p { font-size: var(--s-1); color: var(--muted); }
+.state code { color: var(--text); }
+
+.feats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 36px 40px; }
+.feat { display: grid; gap: 8px; align-content: start; }
+.feat .eyebrow { color: var(--coral); }
+.feat h3 { font: 700 var(--s2)/1.15 var(--display); letter-spacing: -0.015em; }
+.feat p { color: var(--muted); max-width: 38ch; }
+.feat .mono { color: var(--text); }
+
+.table-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 14px; background: var(--raised); }
+table { width: 100%; border-collapse: collapse; min-width: 560px; font-size: var(--s-1); }
+th, td { text-align: left; padding: 13px 16px; border-bottom: 1px solid var(--line); vertical-align: top; }
+th { font: 500 var(--s-1)/1 var(--mono); letter-spacing: .06em; text-transform: uppercase; color: var(--faint); }
+tr:last-child td { border-bottom: 0; }
+td:first-child { font-weight: 600; white-space: nowrap; }
+td .mono { color: var(--muted); }
+
+.price-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; max-width: 860px; }
+.plan { padding: 26px; border-radius: 16px; border: 1px solid var(--line); background: var(--raised); display: grid; gap: 14px; align-content: start; }
+.plan.pro { border-color: var(--coral); box-shadow: 0 0 0 4px var(--glow); }
+.plan h3 { font: 700 var(--s2)/1 var(--display); }
+.plan .amt { font: 800 var(--s3)/1 var(--display); letter-spacing: -0.03em; font-variant-numeric: tabular-nums; }
+.plan .amt small { font: 500 var(--s0)/1 var(--body); color: var(--muted); letter-spacing: 0; }
+.plan ul { margin: 0; padding: 0; list-style: none; display: grid; gap: 8px; color: var(--muted); }
+.plan li { display: grid; grid-template-columns: 18px 1fr; gap: 8px; }
+.plan li::before { content: "✓"; color: var(--mint); font-weight: 700; }
+
+.faq { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 28px 48px; max-width: 980px; }
+.faq h3 { font: 600 var(--s0)/1.35 var(--body); margin-bottom: 6px; }
+.faq p { color: var(--muted); font-size: var(--s-1); max-width: 52ch; }
+
+.closing { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 470px); gap: 32px; align-items: end; }
+.closing h2 { font-size: var(--s3); line-height: 1.05; letter-spacing: -0.025em; }
+
+footer { border-top: 1px solid var(--line); padding-block: 28px 40px; display: flex; flex-wrap: wrap; gap: 12px 24px; justify-content: space-between; color: var(--faint); font-size: var(--s-1); }
+
+@media (max-width: 920px) {
+  .hero, .closing { grid-template-columns: 1fr; }
+  .states { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .feats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .agents-grid { grid-template-columns: 1fr; }
+}
+@media (max-width: 600px) {
+  .top nav a:not(.pill-link) { display: none; }
+  .states, .feats, .price-grid, .faq { grid-template-columns: 1fr; }
+  .desk { grid-template-columns: minmax(0, 1fr) 64px; padding: 12px; gap: 12px; min-height: 400px; }
+  .bar { width: 64px; gap: 14px; }
+  .ico { width: 40px; height: 40px; border-radius: 12px; font-size: 14px; }
+  .card { right: 84px; width: calc(100% - 108px); padding: 12px; }
+  .term pre { font-size: 11px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+}
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <a class="brand" href="#" aria-label="Boxbox home">
+      <span class="mark" aria-hidden="true"><i style="background:#E8836A"></i><i style="background:#FFB43C"></i><i style="background:#3DDC97"></i></span>
+      <span class="brand-name">Boxbox</span>
+    </a>
+    <nav>
+      <a href="#how">How it works</a>
+      <a href="#agents">Agents</a>
+      <a href="#terminals">Terminals</a>
+      <a href="#pricing">Pricing</a>
+      <a class="pill-link" href="#join">Join the waitlist</a>
+    </nav>
+  </header>
+
+  <main>
+    <div class="hero">
+      <div>
+        <p class="eyebrow">Box, box · For Claude Code, Copilot CLI and Codex on macOS</p>
+        <h1 style="margin-top:16px">Five agents running.<br><span class="need">One of them needs you.</span></h1>
+        <p class="lede">A slim bar at the edge of your screen shows every coding agent session and what it's doing, whether Claude Code, GitHub Copilot CLI or Codex runs it. Click one and you're in its exact terminal pane.</p>
+
+        <form class="join" id="join" novalidate>
+          <div class="join-row">
+            <label class="eyebrow" for="email" style="position:absolute;left:-9999px">Email</label>
+            <input type="email" id="email" name="email" placeholder="you@company.com" autocomplete="email" required>
+            <button class="btn" type="submit">Get early access</button>
+          </div>
+          <fieldset class="agents">
+            <legend>Which agents do you run? (optional)</legend>
+            <label><input type="checkbox" id="ag-claude" name="agents" value="claude-code" checked> Claude Code</label>
+            <label><input type="checkbox" id="ag-copilot" name="agents" value="copilot"> Copilot CLI</label>
+            <label><input type="checkbox" id="ag-codex" name="agents" value="codex"> Codex CLI</label>
+            <label><input type="checkbox" id="ag-opencode" name="agents" value="opencode"> OpenCode</label>
+            <label><input type="checkbox" id="ag-gemini" name="agents" value="gemini"> Gemini CLI</label>
+          </fieldset>
+          <p class="join-note" id="join-note">One email when the beta opens. Nothing else.</p>
+          <p class="join-note" id="join-owner" hidden></p>
+        </form>
+
+        <div class="works" aria-label="Works with">
+          <span class="chip">iTerm2</span><span class="chip">Terminal</span><span class="chip">cmux</span><span class="chip">tmux</span><span class="chip">WezTerm</span><span class="chip">kitty</span><span class="chip">VS Code &amp; Cursor</span>
+        </div>
+      </div>
+
+      <div>
+        <div class="desk" id="desk">
+          <div class="term" aria-hidden="true">
+            <div class="term-bar"><i></i><i></i><i></i><span id="term-title">shop-backend — iTerm2 — tab 3</span></div>
+            <pre id="term-body"></pre>
+          </div>
+          <div class="bar" role="group" aria-label="Demo sidebar">
+            <span class="star" aria-hidden="true"></span>
+            <button class="ico" data-i="0" style="--c:#7C8CFF;--ag:#A98BFF" aria-label="api-gateway"><svg class="am" viewBox="0 0 13 13" width="13" height="13" aria-hidden="true"><g transform="translate(6.5 6.5)"><rect x="-5.85" y="-1.82" width="11.70" height="8.06" rx="3.38" fill="#A98BFF" fill-opacity="0.85"/><rect x="-2.34" y="0.39" width="1.30" height="2.34" rx="0.65" fill="#0B0B0E"/><rect x="1.04" y="0.39" width="1.30" height="2.34" rx="0.65" fill="#0B0B0E"/><rect x="-6.50" y="-6.24" width="6.24" height="5.72" rx="2.08" fill="#A98BFF"/><rect x="-5.59" y="-5.33" width="4.42" height="3.90" rx="1.30" fill="#0B0B0E" fill-opacity="0.55"/><rect x="0.26" y="-6.24" width="6.24" height="5.72" rx="2.08" fill="#A98BFF"/><rect x="1.17" y="-5.33" width="4.42" height="3.90" rx="1.30" fill="#0B0B0E" fill-opacity="0.55"/></g></svg><span class="ini">AP</span><span class="ring"></span><span class="badge"></span><span class="ctx"><b style="width:42%"></b></span></button>
+            <button class="ico" data-i="1" style="--c:#4FD1C5;--ag:#E07A5A" aria-label="shop-backend"><svg class="am" viewBox="0 0 13 13" width="13" height="13" aria-hidden="true"><g transform="translate(6.5 6.5)"><path d="M0.00 -1.17L0.00 -6.50M0.58 -1.01L2.53 -4.39M1.01 -0.58L5.35 -3.09M1.17 0.00L4.68 0.00M1.01 0.58L5.63 3.25M0.58 1.01L2.66 4.62M0.00 1.17L0.00 5.85M-0.59 1.01L-2.41 4.17M-1.01 0.59L-5.63 3.25M-1.17 0.00L-5.20 0.00M-1.01 -0.59L-5.24 -3.02M-0.59 -1.01L-2.47 -4.28" stroke="#E07A5A" stroke-width="1.82" stroke-linecap="round" fill="none"/></g></svg><span class="ini">SB</span><span class="ring"></span><span class="badge"></span><span class="ctx"><b style="width:73%"></b></span></button>
+            <button class="ico" data-i="2" style="--c:#B38CFF;--ag:#4FD1A5" aria-label="docs-site"><svg class="am" viewBox="0 0 13 13" width="13" height="13" aria-hidden="true"><g transform="translate(6.5 6.5)"><polygon points="0.00,-5.98 5.18,-2.99 5.18,2.99 0.00,5.98 -5.18,2.99 -5.18,-2.99" fill="none" stroke="#4FD1A5" stroke-width="1.43" stroke-linejoin="round"/><path d="M-2.60 -1.82L-0.52 0.00L-2.60 1.82M0.26 2.08L2.60 2.08" fill="none" stroke="#4FD1A5" stroke-width="1.43" stroke-linecap="round" stroke-linejoin="round"/></g></svg><span class="ini">DO</span><span class="ring"></span><span class="badge"></span><span class="ctx"><b style="width:18%"></b></span></button>
+            <button class="ico" data-i="3" style="--c:#F6C453;--ag:#E07A5A" aria-label="web-billing"><svg class="am" viewBox="0 0 13 13" width="13" height="13" aria-hidden="true"><g transform="translate(6.5 6.5)"><path d="M0.00 -1.17L0.00 -6.50M0.58 -1.01L2.53 -4.39M1.01 -0.58L5.35 -3.09M1.17 0.00L4.68 0.00M1.01 0.58L5.63 3.25M0.58 1.01L2.66 4.62M0.00 1.17L0.00 5.85M-0.59 1.01L-2.41 4.17M-1.01 0.59L-5.63 3.25M-1.17 0.00L-5.20 0.00M-1.01 -0.59L-5.24 -3.02M-0.59 -1.01L-2.47 -4.28" stroke="#E07A5A" stroke-width="1.82" stroke-linecap="round" fill="none"/></g></svg><span class="ini">WB</span><span class="ring"></span><span class="badge"></span><span class="ctx"><b style="width:91%"></b></span></button>
+          </div>
+          <div class="card" id="card">
+            <div class="head"><h3 id="card-name">shop-backend</h3><span class="agent-chip" id="card-agent"></span></div>
+            <p class="meta" id="card-meta">main · Opus 5.5 · $0.84</p>
+            <p class="lab" id="card-lab" style="color:#FFB43C">Needs you</p>
+            <p class="cmd" id="card-cmd">Bash · npm test</p>
+            <div class="acts" id="card-acts">
+              <button class="allow" type="button" id="b-allow">Allow</button>
+              <button type="button" id="b-always">Always</button>
+              <button class="deny" type="button" id="b-deny">Deny</button>
+            </div>
+          </div>
+        </div>
+        <p class="desk-cap">Live demo. Hover or click an icon, answer the request.</p>
+      </div>
+    </div>
+
+    <section id="how">
+      <div class="sec-head">
+        <p class="eyebrow">Read it at a glance</p>
+        <h2>Four states. You learn them in a minute.</h2>
+        <p>Boxbox listens to each agent's own hook events, so the icons change the moment the agent does.</p>
+      </div>
+      <div class="states">
+        <div class="state"><span class="dot" style="background:var(--coral)"></span><h3>Running</h3><p>A comet circles the icon. Triggered by <code>UserPromptSubmit</code> and tool use.</p></div>
+        <div class="state"><span class="dot" style="background:var(--amber)"></span><h3>Needs you</h3><p>Amber glow and a question mark. A permission request or a question is waiting.</p></div>
+        <div class="state"><span class="dot" style="background:var(--mint)"></span><h3>Done</h3><p>Mint ring with a check. The answer from <code>Stop</code> is ready and you haven't looked yet.</p></div>
+        <div class="state"><span class="dot" style="background:var(--sky)"></span><h3>Subagents</h3><p>A blue number on the icon. That's how many subagents this session is running.</p></div>
+      </div>
+    </section>
+
+    <section id="agents">
+      <div class="sec-head">
+        <p class="eyebrow">Agents</p>
+        <h2>One bar, whichever agent runs the session.</h2>
+        <p>Each icon carries a small mark, so you see at a glance who's working where.</p>
+      </div>
+      <div class="agents-grid">
+        <div class="agent">
+          <header><svg class="big" viewBox="0 0 26 26" width="26" height="26" aria-hidden="true"><g transform="translate(13.0 13.0)"><path d="M0.00 -2.34L0.00 -13.00M1.17 -2.03L5.07 -8.78M2.03 -1.17L10.70 -6.17M2.34 0.00L9.36 0.00M2.03 1.17L11.26 6.50M1.17 2.03L5.33 9.23M0.00 2.34L0.00 11.70M-1.17 2.03L-4.81 8.33M-2.03 1.17L-11.26 6.50M-2.34 0.00L-10.40 0.00M-2.03 -1.17L-10.47 -6.05M-1.17 -2.03L-4.94 -8.56" stroke="#E07A5A" stroke-width="3.64" stroke-linecap="round" fill="none"/></g></svg><div><h3>Claude Code</h3><p class="src">~/.claude/settings.json</p></div></header>
+          <ul><li>Status, tool, prompt, answer</li><li>Allow, Always or Deny from the bar</li><li>5-hour and weekly limits, tokens, API value</li><li>Subagents, resume from history</li></ul>
+        </div>
+        <div class="agent">
+          <header><svg class="big" viewBox="0 0 26 26" width="26" height="26" aria-hidden="true"><g transform="translate(13.0 13.0)"><rect x="-11.70" y="-3.64" width="23.40" height="16.12" rx="6.76" fill="#A98BFF" fill-opacity="0.85"/><rect x="-4.68" y="0.78" width="2.60" height="4.68" rx="1.30" fill="#0B0B0E"/><rect x="2.08" y="0.78" width="2.60" height="4.68" rx="1.30" fill="#0B0B0E"/><rect x="-13.00" y="-12.48" width="12.48" height="11.44" rx="4.16" fill="#A98BFF"/><rect x="-11.18" y="-10.66" width="8.84" height="7.80" rx="2.60" fill="#0B0B0E" fill-opacity="0.55"/><rect x="0.52" y="-12.48" width="12.48" height="11.44" rx="4.16" fill="#A98BFF"/><rect x="2.34" y="-10.66" width="8.84" height="7.80" rx="2.60" fill="#0B0B0E" fill-opacity="0.55"/></g></svg><div><h3>GitHub Copilot CLI</h3><p class="src">~/.copilot/hooks</p></div></header>
+          <ul><li>Status, tool, prompt, answer</li><li>Waiting for your approval</li><li>Premium requests left this month</li><li>Model name, resume from history</li><li class="no">Approvals stay in the terminal</li></ul>
+        </div>
+        <div class="agent">
+          <header><svg class="big" viewBox="0 0 26 26" width="26" height="26" aria-hidden="true"><g transform="translate(13.0 13.0)"><polygon points="0.00,-11.96 10.36,-5.98 10.36,5.98 0.00,11.96 -10.36,5.98 -10.36,-5.98" fill="none" stroke="#4FD1A5" stroke-width="2.86" stroke-linejoin="round"/><path d="M-5.20 -3.64L-1.04 0.00L-5.20 3.64M0.52 4.16L5.20 4.16" fill="none" stroke="#4FD1A5" stroke-width="2.86" stroke-linecap="round" stroke-linejoin="round"/></g></svg><div><h3>Codex CLI</h3><p class="src">~/.codex/hooks.json</p></div></header>
+          <ul><li>Status, tool, prompt, answer</li><li>Waiting for your approval</li><li>5-hour and weekly limits</li><li>Subagents, model name, resume</li><li class="no">Approvals stay in the terminal</li></ul>
+        </div>
+      </div>
+      <p class="agents-next">Next up: OpenCode and Gemini CLI. Tick yours in the waitlist form.</p>
+    </section>
+
+    <section>
+      <div class="sec-head">
+        <p class="eyebrow">What it does</p>
+        <h2>Stop hunting through tabs.</h2>
+      </div>
+      <div class="feats">
+        <div class="feat"><p class="eyebrow">Jump</p><h3>The exact pane, not just the app</h3><p>A click lands on the right iTerm session, tmux pane, WezTerm tab or editor terminal. <span class="mono">⌥⌘J</span> takes you to whoever is waiting, Esc stops a run in a background tab.</p></div>
+        <div class="feat"><p class="eyebrow">Permissions</p><h3>Allow from the edge of the screen</h3><p>Allow, Always or Deny for Claude Code in the hover card. If you're already in that terminal, Claude asks there as usual.</p></div>
+        <div class="feat"><p class="eyebrow">App</p><h3>Everything in one window</h3><p>Overview, every live session with its history, and a resume button that reopens it in <span class="mono">claude</span>, <span class="mono">copilot</span> or <span class="mono">codex</span>.</p></div>
+        <div class="feat"><p class="eyebrow">Changes</p><h3><span class="mono">+120 −34 · 5 files</span></h3><p>Uncommitted changes per session, one click to the diff or your editor's source control.</p></div>
+        <div class="feat"><p class="eyebrow">Usage</p><h3>Every plan limit in one place</h3><p>Claude's and Codex's 5-hour and weekly windows, Copilot's premium requests, context fill per session, and what Claude's tokens would cost via the API.</p></div>
+        <div class="feat"><p class="eyebrow">Recap</p><h3>Your week with your agents</h3><p>Prompts, agent time, tokens and cost per project, compared with the week before. Every Monday morning.</p></div>
+      </div>
+    </section>
+
+    <section id="terminals">
+      <div class="sec-head">
+        <p class="eyebrow">Where a click takes you</p>
+        <h2>Built for the terminals people actually use.</h2>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Terminal</th><th>Click jumps to</th><th>Setup</th></tr></thead>
+          <tbody>
+            <tr><td>iTerm2</td><td>the exact session</td><td>none</td></tr>
+            <tr><td>Terminal</td><td>the exact tab, found by its TTY</td><td>none</td></tr>
+            <tr><td>tmux</td><td>session, window and pane <span class="mono">%7</span>, then the terminal around it</td><td>none</td></tr>
+            <tr><td>WezTerm</td><td>tab and pane</td><td>none</td></tr>
+            <tr><td>cmux</td><td>workspace and panel</td><td>socket mode "Password"</td></tr>
+            <tr><td>kitty</td><td>the exact window</td><td>remote control in <span class="mono">kitty.conf</span></td></tr>
+            <tr><td>VS Code, Cursor, Windsurf, Antigravity</td><td>window and terminal panel</td><td>small extension, installed for you</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="pricing">
+      <div class="sec-head">
+        <p class="eyebrow">Pricing</p>
+        <h2>Pay once. Keep it.</h2>
+        <p>No subscription, no account. Waitlist members get the launch price.</p>
+      </div>
+      <div class="price-grid">
+        <div class="plan">
+          <h3>Free</h3>
+          <p class="amt">€0</p>
+          <ul>
+            <li>The bar with live status for every session</li>
+            <li>One-click jump to the exact pane</li>
+            <li>Keyboard shortcuts and quick switcher</li>
+            <li>Done and waiting reminders</li>
+          </ul>
+        </div>
+        <div class="plan pro">
+          <h3>Pro</h3>
+          <p class="amt">€15 <small>one-time</small></p>
+          <ul>
+            <li>Everything in Free</li>
+            <li>Answer Claude's permission requests from the bar</li>
+            <li>Interrupt any session with Esc</li>
+            <li>Plan limits for Claude, Copilot and Codex</li>
+            <li>Changes, API value, daily stats and weekly recap</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <div class="sec-head">
+        <p class="eyebrow">Questions</p>
+        <h2>Before you ask.</h2>
+      </div>
+      <div class="faq">
+        <div><h3>Is this made by Anthropic, GitHub or OpenAI?</h3><p>No. Boxbox is an independent app that works with each agent through its public hooks. It isn't affiliated with or endorsed by Anthropic, GitHub or OpenAI.</p></div>
+        <div><h3>Does my code leave my Mac?</h3><p>No. The app only listens on <code>127.0.0.1</code> and keeps everything in your Library folder. It goes online for the update check and, if you use Copilot, to read your premium requests from GitHub.</p></div>
+        <div><h3>Will it slow my agent down?</h3><p>No. The hook runs in the background with a one-second timeout. If the app isn't running, your agent carries on as if it weren't installed.</p></div>
+        <div><h3>Which agents does it support?</h3><p>Claude Code, GitHub Copilot CLI and Codex CLI today. OpenCode and Gemini CLI are next; tick yours in the waitlist form so we know.</p></div>
+        <div><h3>Which Macs?</h3><p>macOS 14 Sonoma or later, Apple silicon and Intel.</p></div>
+        <div><h3>Does it work with several screens?</h3><p>Yes. The bar follows the screen with the active window, or stays on your main screen if you prefer.</p></div>
+      </div>
+    </section>
+
+    <section>
+      <div class="closing">
+        <h2>Your agents are on track. You call them in.</h2>
+        <div>
+          <a class="btn" href="#join" style="display:inline-block;text-decoration:none">Join the waitlist</a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <span>Boxbox · works with Claude Code, GitHub Copilot CLI and Codex CLI · not affiliated with Anthropic, GitHub or OpenAI</span>
+    <span>Claude is a trademark of Anthropic, PBC. GitHub Copilot is a trademark of GitHub, Inc. Codex is a trademark of OpenAI.</span>
+  </footer>
+</div>
+
+<script>
+(() => {
+
+  const sessions = [
+    { name: "api-gateway", agent: "copilot", meta: "feat/rate-limits · Claude Sonnet 5", tab: "api-gateway — copilot — tmux %7 — WezTerm",
+      log: ['<span class="p">›</span> add per-key rate limits to the gateway', '', '● Reading src/limits.ts', '● Editing src/limits.ts  <span class="ok">+48 −6</span>', '● Running npm test …'] },
+    { name: "shop-backend", agent: "claude", meta: "main · Opus 5.5 · $0.84", tab: "shop-backend — iTerm2 — tab 3",
+      log: ['<span class="p">›</span> fix the failing checkout test', '', 'Reading tests/checkout.test.ts', 'Found it: currency rounding in cart.ts', '', '<span class="hl">Claude wants to run: npm test</span>'] },
+    { name: "docs-site", agent: "codex", meta: "main · gpt-6", tab: "docs-site — codex — VS Code — terminal 2",
+      log: ['<span class="p">›</span> update the install guide for v0.3', '', 'Edited docs/install.md  <span class="ok">+31 −12</span>', '', '<span class="ok">Done.</span> The guide now covers tmux and kitty.'] },
+    { name: "web-billing", agent: "claude", meta: "fix/invoice-pdf · Opus 5.5 · $3.40", tab: "web-billing — cmux — workspace 2",
+      log: ['<span class="p">›</span> waiting for your next prompt', '', 'Context 91 % full. Consider /compact.'] },
+  ];
+  const state = ["running", "needs", "done", "idle"];
+  const agents = {
+    claude: { name: "Claude", color: "#E07A5A", mark: '<svg class="am" viewBox="0 0 11 11" width="11" height="11" aria-hidden="true"><g transform="translate(5.5 5.5)"><path d="M0.00 -0.99L0.00 -5.50M0.49 -0.86L2.14 -3.72M0.86 -0.49L4.52 -2.61M0.99 0.00L3.96 0.00M0.86 0.49L4.76 2.75M0.49 0.86L2.25 3.91M0.00 0.99L0.00 4.95M-0.50 0.86L-2.04 3.52M-0.86 0.50L-4.76 2.75M-0.99 0.00L-4.40 0.00M-0.86 -0.50L-4.43 -2.56M-0.50 -0.86L-2.09 -3.62" stroke="#E07A5A" stroke-width="1.54" stroke-linecap="round" fill="none"/></g></svg>' },
+    copilot: { name: "Copilot", color: "#A98BFF", mark: '<svg class="am" viewBox="0 0 11 11" width="11" height="11" aria-hidden="true"><g transform="translate(5.5 5.5)"><rect x="-4.95" y="-1.54" width="9.90" height="6.82" rx="2.86" fill="#A98BFF" fill-opacity="0.85"/><rect x="-1.98" y="0.33" width="1.10" height="1.98" rx="0.55" fill="#0B0B0E"/><rect x="0.88" y="0.33" width="1.10" height="1.98" rx="0.55" fill="#0B0B0E"/><rect x="-5.50" y="-5.28" width="5.28" height="4.84" rx="1.76" fill="#A98BFF"/><rect x="-4.73" y="-4.51" width="3.74" height="3.30" rx="1.10" fill="#0B0B0E" fill-opacity="0.55"/><rect x="0.22" y="-5.28" width="5.28" height="4.84" rx="1.76" fill="#A98BFF"/><rect x="0.99" y="-4.51" width="3.74" height="3.30" rx="1.10" fill="#0B0B0E" fill-opacity="0.55"/></g></svg>' },
+    codex: { name: "Codex", color: "#4FD1A5", mark: '<svg class="am" viewBox="0 0 11 11" width="11" height="11" aria-hidden="true"><g transform="translate(5.5 5.5)"><polygon points="0.00,-5.06 4.38,-2.53 4.38,2.53 0.00,5.06 -4.38,2.53 -4.38,-2.53" fill="none" stroke="#4FD1A5" stroke-width="1.21" stroke-linejoin="round"/><path d="M-2.20 -1.54L-0.44 0.00L-2.20 1.54M0.22 1.76L2.20 1.76" fill="none" stroke="#4FD1A5" stroke-width="1.21" stroke-linecap="round" stroke-linejoin="round"/></g></svg>' },
+  };
+
+  const icons = [...document.querySelectorAll(".ico")];
+  const card = document.getElementById("card");
+  const desk = document.getElementById("desk");
+  const termTitle = document.getElementById("term-title");
+  const termBody = document.getElementById("term-body");
+  let shown = 1, active = 1, timer = null;
+
+  function paint() {
+    icons.forEach((el, i) => { el.dataset.s = state[i]; el.classList.toggle("active", i === active); });
+    termTitle.textContent = sessions[active].tab;
+    termBody.innerHTML = sessions[active].log.join("\n");
+  }
+
+  function showCard(i) {
+    shown = i;
+    const s = sessions[i], st = state[i];
+    const labels = { running: ["Working", "#E07A5A", "Bash · npm test"], needs: ["Needs you", "#FFB43C", "Bash · npm test"],
+                     done: ["Answer", "#3DDC97", "The guide now covers tmux and kitty."], idle: ["Ready", "#8C8C98", "No prompt yet"] };
+    const [lab, col, cmd] = labels[st];
+    document.getElementById("card-name").textContent = s.name;
+    document.getElementById("card-meta").textContent = s.meta;
+    const chip = document.getElementById("card-agent"), ag = agents[s.agent];
+    chip.innerHTML = ag.mark; chip.append(ag.name); chip.style.setProperty("--ag", ag.color);
+    const l = document.getElementById("card-lab"); l.textContent = lab; l.style.color = col;
+    document.getElementById("card-cmd").textContent = cmd;
+    document.getElementById("card-acts").hidden = st !== "needs";
+    const r = icons[i].getBoundingClientRect(), d = desk.getBoundingClientRect();
+    card.style.top = Math.max(12, Math.min(d.height - card.offsetHeight - 12, r.top - d.top + r.height / 2 - card.offsetHeight / 2)) + "px";
+    card.hidden = false;
+  }
+
+  function decide(next) {
+    state[1] = next;
+    if (next === "running") {
+      sessions[1].log = ['<span class="p">›</span> fix the failing checkout test', '', '<span class="ok">Allowed</span> npm test', 'Running 42 tests …'];
+      setTimeout(() => { state[1] = "done"; sessions[1].log.push('<span class="ok">42 passed.</span> Fixed the rounding in cart.ts.'); refresh(); }, 2600);
+    }
+    refresh();
+  }
+  function refresh() { paint(); showCard(shown); }
+
+  icons.forEach((el, i) => {
+    el.addEventListener("mouseenter", () => showCard(i));
+    el.addEventListener("focus", () => showCard(i));
+    el.addEventListener("click", () => { active = i; if (state[i] === "done") state[i] = "idle"; refresh(); });
+  });
+  document.getElementById("b-allow").addEventListener("click", () => decide("running"));
+  document.getElementById("b-always").addEventListener("click", () => decide("running"));
+  document.getElementById("b-deny").addEventListener("click", () => { state[1] = "idle"; refresh(); });
+
+  // Nach einer Weile ohne Klick fängt die Demo wieder von vorn an.
+  setInterval(() => {
+    if (state.every(s => s !== "needs")) {
+      state.splice(0, 4, "running", "needs", "done", "idle");
+      sessions[1].log = ['<span class="p">›</span> fix the failing checkout test', '', 'Reading tests/checkout.test.ts', 'Found it: currency rounding in cart.ts', '', '<span class="hl">Claude wants to run: npm test</span>'];
+      shown = 1; refresh();
+    }
+  }, 9000);
+
+  paint();
+  requestAnimationFrame(() => showCard(1));
+  window.addEventListener("resize", () => showCard(shown));
+  document.fonts?.ready.then(() => showCard(shown));
+
+  // Warteliste. Öffentlich (z. B. GitHub Pages): an ein Google-Formular. Als claude.ai-Artifact, wo
+  // fremde Server blockiert sind: in den Speicher der Seite (db), ein Eintrag pro Person unter
+  // waitlist/<id>; nur der Eigentümer liest alle.
+  // Aus dem vorausgefüllten Link des Formulars: …/forms/d/e/<FORM>/viewform?entry.<EMAIL>=…&entry.<AGENTS>=…
+  const GOOGLE_FORM = { id: "1FAIpQLSf7pqpfmX1wdIYadvA6a6ElLwFsqqnheHlakBNljAvit9ZtOQ", email: "1178543813", agents: "852880756" };
+  const inArtifact = !!(window.claude && window.claude.use);
+  const form = document.getElementById("join"), note = document.getElementById("join-note");
+  const ownerNote = document.getElementById("join-owner");
+  const ready = (async () => {
+    const use = window.claude && window.claude.use;
+    if (!use) return {};
+    const [db, user] = await Promise.all([use("db"), use("user")]);
+    const id = user ? await user.id() : null;
+    return { db, user, id };
+  })();
+
+  ready.then(async ({ db, user, id }) => {
+    if (!inArtifact) return;
+    if (!db) return;
+    if (id) {
+      try {
+        const mine = await db.doc("waitlist/" + id).get();
+        if (mine.exists) {
+          note.textContent = "You're on the list as " + (mine.data().email || "you") + ". We'll write when the beta opens.";
+          note.className = "join-done";
+        }
+      } catch { /* bleibt beim normalen Formular */ }
+    }
+    if (user && await user.isOwner()) {
+      db.collection("waitlist").onSnapshot(snap => {
+        ownerNote.textContent = snap.size === 1 ? "Only you see this: 1 person on the waitlist." : "Only you see this: " + snap.size + " people on the waitlist.";
+        ownerNote.hidden = false;
+      }, () => {});
+    }
+  });
+
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const email = form.email.value.trim();
+    if (!/^\S+@\S+\.\S+$/.test(email)) {
+      note.textContent = "Enter an email address like you@company.com.";
+      note.className = "join-note"; form.email.focus(); return;
+    }
+    const agents = [...form.querySelectorAll('input[name="agents"]:checked')].map(x => x.value);
+    const button = form.querySelector("button[type=submit]");
+    if (!inArtifact) { await sendToGoogle(email, agents, button); return; }
+    button.disabled = true;
+    note.textContent = "Saving …"; note.className = "join-note";
+    const { db, id } = await ready;
+    if (!db || !id) {
+      note.textContent = "Signing up needs a claude.ai login with access to this page. Ask whoever shared it with you for an invite.";
+      button.disabled = false; return;
+    }
+    try {
+      await db.doc("waitlist/" + id).set({ email, agents, at: new Date().toISOString() });
+      note.textContent = "You're on the list. We'll write when the beta opens.";
+      note.className = "join-done";
+      form.email.value = "";
+    } catch (err) {
+      note.textContent = err && err.code === "invalid_argument"
+        ? "Your access to this page is view-only, so the sign-up can't be saved. Ask whoever shared it to make you a Contributor."
+        : "That didn't go through. Try again in a moment.";
+    }
+    button.disabled = false;
+  });
+
+  // Google antwortet ohne CORS-Header: die Antwort ist nicht lesbar, ein Netzwerkfehler aber schon.
+  async function sendToGoogle(email, agents, button) {
+    if (!GOOGLE_FORM.id) {
+      note.textContent = "Preview: you'd be on the list now. Nothing was sent.";
+      note.className = "join-done"; form.email.value = ""; return;
+    }
+    const body = new URLSearchParams();
+    body.set("entry." + GOOGLE_FORM.email, email);
+    body.set("entry." + GOOGLE_FORM.agents, agents.join(", "));
+    button.disabled = true;
+    note.textContent = "Saving …"; note.className = "join-note";
+    try {
+      await fetch("https://docs.google.com/forms/d/e/" + GOOGLE_FORM.id + "/formResponse", { method: "POST", mode: "no-cors", body });
+      note.textContent = "You're on the list. We'll write when the beta opens.";
+      note.className = "join-done"; form.email.value = "";
+    } catch {
+      note.textContent = "That didn't go through. Check your connection and try again.";
+    }
+    button.disabled = false;
+  }
+})();
+</script>
