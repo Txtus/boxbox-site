@@ -157,6 +157,24 @@ code, .mono { font-family: var(--mono); font-size: 0.9em; }
 .agents legend { padding: 0; margin-bottom: 6px; color: var(--faint); }
 .agents label { display: inline-flex; gap: 6px; align-items: center; cursor: pointer; }
 .agents input { accent-color: var(--coral); }
+.more { border: 1px solid var(--line); border-radius: 12px; padding: 0 14px; }
+.more[open] { padding-bottom: 14px; }
+.more summary { cursor: pointer; padding: 11px 0; color: var(--muted); font-size: var(--s-1); list-style: none; display: flex; align-items: center; gap: 8px; }
+.more summary::-webkit-details-marker { display: none; }
+.more summary::before { content: "+"; display: inline-grid; place-items: center; width: 18px; height: 18px; border-radius: 50%; border: 1px solid var(--line); color: var(--faint); font-size: 12px; }
+.more[open] summary::before { content: "−"; }
+.more summary:focus-visible { outline: 2px solid var(--coral); outline-offset: 2px; border-radius: 6px; }
+.more-body { display: grid; gap: 16px; }
+.more .agents { gap: 6px 12px; }
+.more .group { display: grid; gap: 6px; }
+.more .group > span { font-size: var(--s-1); color: var(--faint); }
+.more .group > div { display: flex; flex-wrap: wrap; gap: 6px 12px; }
+.join .text {
+  width: 100%; font: inherit; font-size: var(--s-1); color: var(--text); background: var(--raised);
+  border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; resize: vertical;
+}
+.join .text::placeholder { color: var(--faint); }
+.join input:focus-visible, .join textarea:focus-visible { outline: 2px solid var(--coral); outline-offset: 1px; }
 .join-note { font-size: var(--s-1); color: var(--faint); }
 .join-done { font-size: var(--s0); color: var(--mint); }
 
@@ -370,6 +388,30 @@ footer { border-top: 1px solid var(--line); padding-block: 28px 40px; display: f
             <label><input type="checkbox" id="ag-opencode" name="agents" value="opencode"> OpenCode</label>
             <label><input type="checkbox" id="ag-gemini" name="agents" value="gemini"> Gemini CLI</label>
           </fieldset>
+          <details class="more" id="more">
+            <summary>Tell us more (optional)</summary>
+            <div class="more-body">
+              <fieldset class="agents">
+                <legend>Where do you run your agents?</legend>
+                <div class="group" style="width:100%"><span>Terminal apps</span><div><label><input type="checkbox" name="where" value="Terminal"> Terminal</label><label><input type="checkbox" name="where" value="iTerm2"> iTerm2</label><label><input type="checkbox" name="where" value="Ghostty"> Ghostty</label><label><input type="checkbox" name="where" value="Warp"> Warp</label><label><input type="checkbox" name="where" value="WezTerm"> WezTerm</label><label><input type="checkbox" name="where" value="kitty"> kitty</label><label><input type="checkbox" name="where" value="Alacritty"> Alacritty</label></div></div>
+                <div class="group" style="width:100%"><span>Built-in terminal of an editor</span><div><label><input type="checkbox" name="where" value="VS Code"> VS Code</label><label><input type="checkbox" name="where" value="Cursor"> Cursor</label><label><input type="checkbox" name="where" value="Windsurf"> Windsurf</label><label><input type="checkbox" name="where" value="Antigravity"> Antigravity</label><label><input type="checkbox" name="where" value="JetBrains"> JetBrains</label><label><input type="checkbox" name="where" value="Zed"> Zed</label></div></div>
+                <div class="group" style="width:100%"><span>Multiplexers</span><div><label><input type="checkbox" name="where" value="tmux"> tmux</label><label><input type="checkbox" name="where" value="cmux"> cmux</label><label><input type="checkbox" name="where" value="Zellij"> Zellij</label></div></div>
+                <label for="where-other" style="position:absolute;left:-9999px">Somewhere else</label>
+                <input class="text" type="text" id="where-other" name="whereOther" placeholder="Somewhere else? e.g. SSH into a dev box">
+              </fieldset>
+              <fieldset class="agents">
+                <legend>How many sessions run at the same time?</legend>
+                <label><input type="radio" name="sessions" value="1"> 1</label>
+                <label><input type="radio" name="sessions" value="2-3"> 2–3</label>
+                <label><input type="radio" name="sessions" value="4-6"> 4–6</label>
+                <label><input type="radio" name="sessions" value="7+"> 7 or more</label>
+              </fieldset>
+              <div class="group">
+                <label for="notes" class="eyebrow" style="position:absolute;left:-9999px">Notes</label>
+                <textarea class="text" id="notes" name="notes" rows="3" placeholder="What would make Boxbox a must-have for you?"></textarea>
+              </div>
+            </div>
+          </details>
           <p class="join-note" id="join-note">One email when the beta opens. Nothing else.</p>
           <p class="join-note" id="join-owner" hidden></p>
         </form>
@@ -631,7 +673,8 @@ footer { border-top: 1px solid var(--line); padding-block: 28px 40px; display: f
   // fremde Server blockiert sind: in den Speicher der Seite (db), ein Eintrag pro Person unter
   // waitlist/<id>; nur der Eigentümer liest alle.
   // Aus dem vorausgefüllten Link des Formulars: …/forms/d/e/<FORM>/viewform?entry.<EMAIL>=…&entry.<AGENTS>=…
-  const GOOGLE_FORM = { id: "1FAIpQLSf7pqpfmX1wdIYadvA6a6ElLwFsqqnheHlakBNljAvit9ZtOQ", email: "1178543813", agents: "852880756" };
+  const GOOGLE_FORM = { id: "1FAIpQLSf7pqpfmX1wdIYadvA6a6ElLwFsqqnheHlakBNljAvit9ZtOQ",
+    fields: { email: "1178543813", agents: "852880756", where: "870554712", sessions: "1102925942", notes: "87022523" } };
   const inArtifact = !!(window.claude && window.claude.use);
   const form = document.getElementById("join"), note = document.getElementById("join-note");
   const ownerNote = document.getElementById("join-owner");
@@ -671,8 +714,16 @@ footer { border-top: 1px solid var(--line); padding-block: 28px 40px; display: f
       note.className = "join-note"; form.email.focus(); return;
     }
     const agents = [...form.querySelectorAll('input[name="agents"]:checked')].map(x => x.value);
+    const where = [...form.querySelectorAll('input[name="where"]:checked')].map(x => x.value);
+    const other = form.whereOther.value.trim();
+    if (other) where.push(other);
+    const answer = {
+      email, agents: agents.join(", "), where: where.join(", "),
+      sessions: form.querySelector('input[name="sessions"]:checked')?.value || "",
+      notes: form.notes.value.trim().slice(0, 2000),
+    };
     const button = form.querySelector("button[type=submit]");
-    if (!inArtifact) { await sendToGoogle(email, agents, button); return; }
+    if (!inArtifact) { await sendToGoogle(answer, button); return; }
     button.disabled = true;
     note.textContent = "Saving …"; note.className = "join-note";
     const { db, id } = await ready;
@@ -681,7 +732,7 @@ footer { border-top: 1px solid var(--line); padding-block: 28px 40px; display: f
       button.disabled = false; return;
     }
     try {
-      await db.doc("waitlist/" + id).set({ email, agents, at: new Date().toISOString() });
+      await db.doc("waitlist/" + id).set({ ...answer, agents, where, at: new Date().toISOString() });
       note.textContent = "You're on the list. We'll write when the beta opens.";
       note.className = "join-done";
       form.email.value = "";
@@ -694,20 +745,21 @@ footer { border-top: 1px solid var(--line); padding-block: 28px 40px; display: f
   });
 
   // Google antwortet ohne CORS-Header: die Antwort ist nicht lesbar, ein Netzwerkfehler aber schon.
-  async function sendToGoogle(email, agents, button) {
+  async function sendToGoogle(answer, button) {
     if (!GOOGLE_FORM.id) {
       note.textContent = "Preview: you'd be on the list now. Nothing was sent.";
       note.className = "join-done"; form.email.value = ""; return;
     }
     const body = new URLSearchParams();
-    body.set("entry." + GOOGLE_FORM.email, email);
-    body.set("entry." + GOOGLE_FORM.agents, agents.join(", "));
+    for (const [key, entry] of Object.entries(GOOGLE_FORM.fields)) {
+      if (answer[key]) body.set("entry." + entry, answer[key]);
+    }
     button.disabled = true;
     note.textContent = "Saving …"; note.className = "join-note";
     try {
       await fetch("https://docs.google.com/forms/d/e/" + GOOGLE_FORM.id + "/formResponse", { method: "POST", mode: "no-cors", body });
       note.textContent = "You're on the list. We'll write when the beta opens.";
-      note.className = "join-done"; form.email.value = "";
+      note.className = "join-done"; form.reset(); document.getElementById("more").open = false;
     } catch {
       note.textContent = "That didn't go through. Check your connection and try again.";
     }
