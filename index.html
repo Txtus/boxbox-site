@@ -1,6 +1,6 @@
 <title>Boxbox</title>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="description" content="A slim bar at the edge of your Mac screen that shows every Claude Code, GitHub Copilot CLI, Codex CLI and Gemini CLI session. One click takes you to the right terminal pane.">
+<meta name="description" content="A slim bar at the edge of your Mac screen that shows every Claude Code, GitHub Copilot CLI, Codex CLI and Gemini CLI and OpenCode session. One click takes you to the right terminal pane.">
 <link rel="stylesheet" href="fonts/fonts.css">
 <style>
 /* Layout: a dark product world. Left: the claim and the waitlist. Right: the bar itself, live, at the edge of a fake desktop. Everything below reads like the app's hover card. */
@@ -260,7 +260,9 @@ code, .mono { font-family: var(--mono); font-size: 0.9em; }
 .card .head { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
 .agent-chip { display: inline-flex; align-items: center; gap: 5px; padding: 3px 8px; border-radius: 999px; font: 700 11px/1 var(--body); color: var(--ag); border: 1px solid color-mix(in srgb, var(--ag) 40%, transparent); background: color-mix(in srgb, var(--ag) 12%, transparent); white-space: nowrap; }
 .agent-chip svg { width: 11px; height: 11px; }
-.agents-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.agents-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+.agent.more-agents { border-style: dashed; background: transparent; align-content: center; }
+.agent.more-agents p { color: var(--muted); font-size: var(--s-1); }
 .agent { padding: 20px; border-radius: 16px; background: var(--raised); border: 1px solid var(--line); display: grid; gap: 12px; align-content: start; }
 .agent header { display: flex; align-items: center; gap: 10px; }
 .agent header svg { width: 26px; height: 26px; flex: none; }
@@ -337,11 +339,11 @@ footer { border-top: 1px solid var(--line); padding-block: 28px 40px; display: f
   .hero, .closing { grid-template-columns: 1fr; }
   .states { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .feats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .agents-grid { grid-template-columns: 1fr; }
+  .agents-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 @media (max-width: 600px) {
   .top nav a:not(.pill-link) { display: none; }
-  .states, .feats, .price-grid, .faq { grid-template-columns: 1fr; }
+  .states, .feats, .price-grid, .faq, .agents-grid { grid-template-columns: 1fr; }
   .desk { grid-template-columns: minmax(0, 1fr) 64px; padding: 12px; gap: 12px; min-height: 400px; }
   .bar { width: 64px; gap: 14px; }
   .ico { width: 40px; height: 40px; border-radius: 12px; font-size: 14px; }
@@ -371,9 +373,9 @@ footer { border-top: 1px solid var(--line); padding-block: 28px 40px; display: f
   <main>
     <div class="hero">
       <div>
-        <p class="eyebrow">Box, box · For Claude Code, Copilot, Codex and Gemini on macOS</p>
+        <p class="eyebrow">Box, box · For Claude Code, Copilot, Codex, Gemini and OpenCode</p>
         <h1 style="margin-top:16px">Five agents running.<br><span class="need">One of them needs you.</span></h1>
-        <p class="lede">A slim bar at the edge of your screen shows every coding agent session and what it's doing, whether Claude Code, GitHub Copilot CLI, Codex or Gemini CLI runs it. Click one and you're in its exact terminal pane.</p>
+        <p class="lede">A slim bar at the edge of your screen shows every coding agent session and what it's doing, whether Claude Code, Copilot, Codex, Gemini or OpenCode runs it. Click one and you're in its exact terminal pane.</p>
 
         <form class="join" id="join" novalidate>
           <div class="join-row">
@@ -489,8 +491,15 @@ footer { border-top: 1px solid var(--line); padding-block: 28px 40px; display: f
           <header><svg class="big" viewBox="0 0 26 26" width="26" height="26" aria-hidden="true"><path d="M13 0Q13 13 26 13Q13 13 13 26Q13 13 0 13Q13 13 13 0Z" fill="#6E9BFF"/></svg><div><h3>Gemini CLI</h3><p class="src">~/.gemini/settings.json</p></div></header>
           <ul><li>Status, tool, prompt, answer</li><li>Waiting for your approval</li><li>Model name, resume from history</li><li class="no">Approvals stay in the terminal</li></ul>
         </div>
+        <div class="agent">
+          <header><svg class="big" viewBox="0 0 26 26" width="26" height="26" aria-hidden="true"><path d="M10 4H3V22H23V4H16M13 16V2M9.5 5.5L13 2L16.5 5.5" fill="none" stroke="#F5C26B" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg><div><h3>OpenCode</h3><p class="src">~/.config/opencode/plugins</p></div></header>
+          <ul><li>Status, tool, prompt, answer</li><li>Waiting for your approval</li><li>Model name and real session cost</li><li>Resume from history</li><li class="no">Approvals stay in the terminal</li></ul>
+        </div>
+        <div class="agent more-agents">
+          <h3>Missing yours?</h3>
+          <p>Name it in the waitlist form. The agents people use most get added next.</p>
+        </div>
       </div>
-      <p class="agents-next">Next up: OpenCode. Tick the agents you use in the waitlist form.</p>
     </section>
 
     <section>
@@ -541,7 +550,7 @@ footer { border-top: 1px solid var(--line); padding-block: 28px 40px; display: f
           <p class="amt">€0</p>
           <ul>
             <li>The bar with live status for every session</li>
-            <li>Claude Code, Copilot CLI, Codex and Gemini CLI</li>
+            <li>Claude Code, Copilot, Codex, Gemini and OpenCode</li>
             <li>One-click jump to the exact pane</li>
             <li>History with one-click resume</li>
             <li>Keyboard shortcuts and quick switcher</li>
@@ -575,7 +584,7 @@ footer { border-top: 1px solid var(--line); padding-block: 28px 40px; display: f
         <div><h3>Is this made by Anthropic, GitHub, OpenAI or Google?</h3><p>No. Boxbox is an independent app that works with each agent through its public hooks. It isn't affiliated with or endorsed by Anthropic, GitHub, OpenAI or Google.</p></div>
         <div><h3>Does my code leave my Mac?</h3><p>No. The app only listens on <code>127.0.0.1</code> and keeps everything in your Library folder. It goes online for the update check and, if you use Copilot, to read your premium requests from GitHub.</p></div>
         <div><h3>Will it slow my agent down?</h3><p>No. The hook runs in the background with a one-second timeout. If the app isn't running, your agent carries on as if it weren't installed.</p></div>
-        <div><h3>Which agents does it support?</h3><p>Claude Code, GitHub Copilot CLI, Codex CLI and Gemini CLI today. OpenCode is next; tick the agents you use in the waitlist form so we know what else to add.</p></div>
+        <div><h3>Which agents does it support?</h3><p>Claude Code, GitHub Copilot CLI, Codex CLI, Gemini CLI and OpenCode. Missing yours? Name it in the waitlist form so we know what to add next.</p></div>
         <div><h3>Which Macs?</h3><p>macOS 14 Sonoma or later, Apple silicon and Intel.</p></div>
         <div><h3>Does it work with several screens?</h3><p>Yes. The bar follows the screen with the active window, or stays on your main screen if you prefer.</p></div>
       </div>
@@ -592,7 +601,7 @@ footer { border-top: 1px solid var(--line); padding-block: 28px 40px; display: f
   </main>
 
   <footer>
-    <span>Boxbox · works with Claude Code, GitHub Copilot CLI, Codex CLI and Gemini CLI · not affiliated with Anthropic, GitHub, OpenAI or Google</span>
+    <span>Boxbox · works with Claude Code, GitHub Copilot CLI, Codex CLI, Gemini CLI and OpenCode · not affiliated with Anthropic, GitHub, OpenAI or Google</span>
     <span>Claude is a trademark of Anthropic, PBC. GitHub Copilot is a trademark of GitHub, Inc. Codex is a trademark of OpenAI. Gemini is a trademark of Google LLC.</span>
     <span><a href="impressum.html">Legal notice</a> · <a href="datenschutz.html">Privacy</a></span>
   </footer>
