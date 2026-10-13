@@ -115,6 +115,12 @@ code, .mono { font-family: var(--mono); font-size: 0.9em; }
 }
 
 /* Hero */
+/* Video */
+.film { margin-top: 0; }
+.film-frame { position: relative; border-radius: 22px; overflow: hidden; border: 1px solid var(--line);
+  background: #0B0B0E; box-shadow: 0 40px 90px -40px rgba(0,0,0,.85), 0 0 0 1px rgba(255,255,255,.02); aspect-ratio: 16 / 9; }
+.film-frame video { display: block; width: 100%; height: 100%; object-fit: cover; background: #0B0B0E; }
+.film-cap { margin-top: 12px; color: var(--faint); font-size: var(--s-1); text-align: center; }
 .hero {
   display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); gap: clamp(28px, 5vw, 64px);
   align-items: center; padding-block: clamp(24px, 6vw, 72px) clamp(48px, 7vw, 96px);
@@ -453,6 +459,19 @@ footer { border-top: 1px solid var(--line); padding-block: 28px 40px; display: f
         <p class="desk-cap">Live demo. Hover or click an icon, answer the request.</p>
       </div>
     </div>
+
+    <section id="film" class="film">
+      <div class="sec-head">
+        <p class="eyebrow">Watch</p>
+        <h2>Boxbox in 30 seconds.</h2>
+      </div>
+      <div class="film-frame">
+        <video controls playsinline preload="none" poster="media/boxbox-promo.jpg" aria-label="Boxbox promo video, 28 seconds">
+          <source src="media/boxbox-promo.mp4" type="video/mp4">
+        </video>
+      </div>
+      <p class="film-cap">With sound. Hosted here, no tracking.</p>
+    </section>
 
     <section id="how">
       <div class="sec-head">
