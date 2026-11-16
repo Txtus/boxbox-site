@@ -407,6 +407,7 @@ footer { border-top: 1px solid var(--line); padding-block: 28px 40px; display: f
             <a class="btn ghost" href="https://buy.stripe.com/14AaEWfNJ57G1Lsc1jcbC01">Buy Pro · €29</a>
           </div>
           <p class="join-note">macOS 14 or later, Apple silicon and Intel. Every install starts with 14 days of Pro, no card needed. After that the bar stays free.</p>
+          <p class="join-note">Or with Homebrew: <code>brew install --cask txtus/boxbox/boxbox</code></p>
           <p class="join-note">Already bought? The page after your purchase unlocks the app with one click.</p>
         </div>
 
@@ -715,3 +716,36 @@ footer { border-top: 1px solid var(--line); padding-block: 28px 40px; display: f
   document.fonts?.ready.then(() => showCard(shown));
 })();
 </script>
+<script>
+// Zählt Aufrufe, Downloads und Klicks auf „Buy“ je Herkunft. Ohne Cookies, ohne Speicher im
+// Browser, ohne Kennung: der Lizenzserver erhöht nur eine Summe je Tag (license-server, /hit).
+// Herkunft: ?ref=… oder ?utm_source=… im Link, sonst die verweisende Seite, sonst "direct".
+(() => {
+  const API = "https://boxbox-license.boxbox-cf1.workers.dev/hit";
+  if (navigator.webdriver || !/^https:/.test(location.protocol)) return;
+  const known = [[/(^|\.)reddit\.com$/, "reddit"], [/^news\.ycombinator\.com$/, "hackernews"], [/(^|\.)producthunt\.com$/, "producthunt"],
+    [/^(t\.co|x\.com|twitter\.com)$/, "x"], [/(^|\.)(linkedin\.com|lnkd\.in)$/, "linkedin"], [/(^|\.)(youtube\.com|youtu\.be)$/, "youtube"],
+    [/(^|\.)github\.com$/, "github"], [/(^|\.)bsky\.app$/, "bluesky"], [/(^|\.)google\.[a-z.]+$/, "google"], [/(^|\.)(bing|duckduckgo)\.com$/, "search"],
+    [/(^|\.)(tiktok|instagram|facebook)\.com$/, "social"]];
+  function referrer() {
+    try {
+      const host = new URL(document.referrer).hostname.replace(/^www\./, "");
+      if (host === location.hostname) return "";
+      return (known.find(([pattern]) => pattern.test(host)) || [0, host.replace(/\./g, "-")])[1];
+    } catch { return ""; }
+  }
+  const query = new URLSearchParams(location.search);
+  const src = (query.get("ref") || query.get("utm_source") || referrer() || "direct").toLowerCase().replace(/[^a-z0-9_-]/g, "").slice(0, 40) || "direct";
+  const send = (event) => { try { navigator.sendBeacon(API, JSON.stringify({ event, src })); } catch {} };
+  send("view");
+  document.querySelectorAll('a[href*="/releases/latest/download/"]').forEach((a) => a.addEventListener("click", () => send("download")));
+  // Stripe merkt sich die Herkunft an der Bestellung (client_reference_id), so sehen wir, welcher Weg zu Käufen führt.
+  document.querySelectorAll('a[href^="https://buy.stripe.com/"]').forEach((a) => {
+    const url = new URL(a.href);
+    url.searchParams.set("client_reference_id", src);
+    a.href = url.href;
+    a.addEventListener("click", () => send("buy"));
+  });
+})();
+</script>
+
